@@ -2,6 +2,9 @@
 
 ## Installation
 
+#### Make sure you are under the correct directory
+> cd server
+
 #### Create a virtual env
 > python3.11 -m venv .venv
 

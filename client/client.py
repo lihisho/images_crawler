@@ -15,14 +15,16 @@ import grpc
 import image_service_pb2
 import image_service_pb2_grpc
 
-channel = None
-
+stub = None
 
 class ImageCrawlerApp(App):
+    def __init__(self):
+        super().__init__()
+        self.stub = stub
+
     def build(self):
         self.layout = BoxLayout(orientation='vertical')
         
-        # Create a horizontal layout for the text input and button
         self.header_layout = BoxLayout(orientation='vertical', size_hint=(1, 0.1))
         input_layout = BoxLayout(orientation='horizontal', size_hint=(1, 1))
         self.error_label = Label(text="", size_hint=(1, 1))
@@ -39,8 +41,7 @@ class ImageCrawlerApp(App):
         self.header_layout.add_widget(input_layout)
         # Add the header layout to the main layout
         self.layout.add_widget(self.header_layout)
-        
-        # Create an image widget
+
         self.image = Image()
         self.layout.add_widget(self.image)
 
@@ -61,12 +62,8 @@ class ImageCrawlerApp(App):
             return
 
         try:
-
-            stub = image_service_pb2_grpc.ImageServiceStub(channel)
             request = image_service_pb2.GetImageRequest(description=self.text_input.text)
-
-            # Make the call and receive the stream
-            response_stream = stub.GetImage(request)
+            response_stream = self.stub.GetImage(request)
 
             # Save the image data to a temporary file
             with tempfile.NamedTemporaryFile(delete=True) as temp_file:
@@ -74,7 +71,6 @@ class ImageCrawlerApp(App):
                     temp_file.write(response.image_data)
                 temp_file_path = temp_file.name
 
-                # Update the Image widget's source
                 self.image.source = temp_file_path
                 self.image.reload()
         except grpc.RpcError as e:
@@ -87,4 +83,5 @@ class ImageCrawlerApp(App):
 
 if __name__ == '__main__':
     channel = grpc.insecure_channel('localhost:50051')
+    stub = image_service_pb2_grpc.ImageServiceStub(channel)
     ImageCrawlerApp().run()

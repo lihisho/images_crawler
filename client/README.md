@@ -1,6 +1,8 @@
-# Crawler Client
+# Image Crawler Client
 
 ## Installation
+#### Make sure you are under the correct directory
+> cd client
 
 #### Create a virtual env
 > python3.11 -m venv .venv
